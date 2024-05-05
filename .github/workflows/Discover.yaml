@@ -1,0 +1,2 @@
+- name: Discover tests
+  run: pytest --collect-only  # Displays information about discovered tests

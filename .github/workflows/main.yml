@@ -11,7 +11,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -24,11 +23,14 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt  # This should include pytest
-          pip install pytest  # Ensure pytest is installed
+          pip install -r requirements.txt  # Ensure pytest and dependencies are installed
+          pip install pytest  # Explicitly install pytest
+
+      - name: Discover tests
+        run: pytest --collect-only  # Debug test discovery
 
       - name: Run tests
         run: pytest
         shell: /usr/bin/bash -e {0}  # Use bash for the shell
         env:
-          DISCORD_BOT_TOKEN: ${{ secrets.LAYCHPA_BOT_TOKEN }}  # Pass the bot token
+          DISCORD_BOT_TOKEN: ${{ secrets.LAYCHPA_BOT_TOKEN }}

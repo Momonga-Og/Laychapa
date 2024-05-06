@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 intents = discord.Intents.default()
 
 # Retrieve the bot token from the environment variable
-bot_token = os.getenv("DISCORD_BOT_TOKEN")
+bot_token = os.getenv("secrets.DISCORD_BOT_TOKEN")
 
 # Ensure the bot token is available
 if not bot_token:

@@ -17,6 +17,9 @@ if not bot_token:
 # Create the bot with the command prefix and intents
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+def test_example_function():
+    assert True  # This is a simple test
+
 def scrape_quest_guide(quest_name):
     # Format quest name to match URL format
     formatted_quest_name = quest_name.lower().replace(' ', '-').replace('’', '').replace('é', 'e').replace('à', 'a')

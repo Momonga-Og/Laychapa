@@ -1,6 +1,0 @@
-- name: List files in the repository
-  run: ls -R  # Lists all files recursively
-
-- name: Check test files
-  run: |
-    ls tests  # Checks if the `tests` directory exists

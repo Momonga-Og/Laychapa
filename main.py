@@ -77,7 +77,7 @@ async def chemin(ctx, *, chemin_name):
     text_content, image_urls = scrape_chemin_guide(chemin_name)
     if text_content:
         # Send text content in chunks if it's too long
-        chunks = [text_content[i:i+1900) for i in range(0, len(text_content), 1900)]
+chunks = [text_content[i:i + 1900] for i in range(0, len(text_content), 1900)]
         for chunk in chunks, await ctx.send(chunk)
 
         # Send images afterward

@@ -12,7 +12,7 @@ intents = discord.Intents.default()
 load_dotenv()  # Ensure .env file is properly loaded
 
 # Retrieve the bot token from the correct environment variable
-bot_token = os.getenv("LAYCHPA_BOT_TOKEN")  # Corrected environment variable name
+bot_token = os.getenv("DISCORD_BOT_TOKEN")  # Corrected environment variable name
 
 # Ensure the bot token is available
 if not bot_token:

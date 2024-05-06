@@ -3,10 +3,12 @@ import discord
 from discord.ext import commands
 import requests
 from bs4 import BeautifulSoup
-
+from dotenv import load_dotenv
 # Define intents
 intents = discord.Intents.default()
 
+# Load environment variables from the .env file
+load_dotenv()
 # Retrieve the bot token from the environment variable
 bot_token = os.getenv("secrets.LAYCHPA_BOT_TOKEN")
 

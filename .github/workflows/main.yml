@@ -1,4 +1,4 @@
-name: Python Tests with Discord Bot
+name: Deploy Discord Bot
 
 on:
   push:

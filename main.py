@@ -12,7 +12,7 @@ intents = discord.Intents.default()
 load_dotenv()  # Ensure .env file is properly loaded
 
 # Retrieve the bot token from the correct environment variable
-bot_token = os.getenv("LAYCHPA_BOT_TOKEN")  # Fixed the environment variable name
+bot_token = os.getenv("LAYCHPA_BOT_TOKEN")  # Corrected environment variable name
 
 # Ensure the bot token is available
 if not bot_token:
@@ -20,9 +20,6 @@ if not bot_token:
 
 # Create the bot with the command prefix and intents
 bot = commands.Bot(command_prefix='!', intents=intents)
-
-def test_example_function():
-    assert True  # This is a simple test
 
 def scrape_quest_guide(quest_name):
     # Format quest name to match URL format
@@ -44,7 +41,7 @@ def scrape_quest_guide(quest_name):
 
 def scrape_chemin_guide(chemin_name):
     # Format chemin name to match URL format
-    formatted_chemin_name is derived in a similar way as `formatted_quest_name`
+    formatted_chemin_name = chemin_name.lower().replace(' ', '-').replace('’', '').replace('é', 'e').replace('à', 'a')
     website_url = f'https://papycha.fr/chemin-{formatted_chemin_name}/'
     response = requests.get(website_url)
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -64,7 +61,7 @@ def scrape_chemin_guide(chemin_name):
 async def quest(ctx, *, quest_name):
     text_content, image_urls = scrape_quest_guide(quest_name)
     if text_content:
-        # Send text content first in chunks if it's too long
+        # Send text content first
         chunks = [text_content[i:i+1900] for i in range(0, len(text_content), 1900)]
         for chunk in chunks:
             await ctx.send(chunk)
@@ -79,14 +76,13 @@ async def quest(ctx, *, quest_name):
 async def chemin(ctx, *, chemin_name):
     text_content, image_urls = scrape_chemin_guide(chemin_name)
     if text_content:
-        # Send text content first in chunks if it's long
-        chunks = [text_content[i:i+1900] for i in range(0, len(text_content), 1900)]
-        for chunk in chunks:
-            await ctx.send(chunk)
+        # Send text content in chunks if it's too long
+        chunks = [text_content[i:i+1900) for i in range(0, len(text_content), 1900)]
+        for chunk in chunks, await ctx.send(chunk)
 
         # Send images afterward
-        for image_url in image_urls, 
-        await ctx.send(image_url)
+        for image_url in image_urls, await ctx.send(image_url)
+
     else:
         await ctx.send(f"Chemin guide for '{chemin_name}' not found.")
 
@@ -94,5 +90,5 @@ async def chemin(ctx, *, chemin_name):
 async def on_ready():
     print(f'Logged in as {bot.user}')
 
-# Start the bot using the correct bot token from the environment variable
-bot.run(bot_token)  # Corrected the environment variable retrieval
+# Start the bot using the correct bot token
+bot.run(bot_token)

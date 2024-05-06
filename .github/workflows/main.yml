@@ -33,4 +33,4 @@ jobs:
         run: pytest
         shell: /usr/bin/bash -e {0}
         env:
-          DISCORD_BOT_TOKEN: ${{ secrets.LAYCHPA_BOT_TOKEN }}  # Passes the token to the test environment
+         DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}

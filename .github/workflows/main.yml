@@ -1,4 +1,4 @@
-name: Python Tests
+name: Python Tests with Discord Bot
 
 on:
   push:
@@ -26,13 +26,11 @@ jobs:
           pip install -r requirements.txt  # Ensure all dependencies are installed
           pip install pytest  # Explicitly install pytest
 
-      - name: List all files
-        run: ls -R  # Lists all files recursively to check for test files
-
-      - name: Discover tests
-        run: pytest --collect-only  # Check if pytest finds test items
-        shell: /usr/bin/bash -e {0}
+      - name: Set bot token
+        run: echo "DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }}" >> $GITHUB_ENV  # Sets the token as an environment variable
 
       - name: Run tests
         run: pytest
         shell: /usr/bin/bash -e {0}
+        env:
+          DISCORD_BOT_TOKEN: ${{ secrets.LAYCHPA_BOT_TOKEN }}  # Passes the token to the test environment

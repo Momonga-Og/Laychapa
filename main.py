@@ -75,16 +75,23 @@ async def quest(ctx, *, quest_name):
 @bot.command()
 async def chemin(ctx, *, chemin_name):
     text_content, image_urls = scrape_chemin_guide(chemin_name)
+    
     if text_content:
-        # Send text content in chunks if it's too long
-chunks = [text_content[i:i + 1900] for i in range(0, len(text_content), 1900)]
-        for chunk in chunks, await ctx.send(chunk)
+        # Ensure proper indentation for the list comprehension
+        chunks = [text_content[i:i + 1900] for i in range(0, len(text_content), 1900)]
+        
+        # Properly indented block to send text content
+        for chunk in chunks:
+            await ctx.send(chunk)
 
-        # Send images afterward
-        for image_url in image_urls, await ctx.send(image_url)
+        # Properly indented block to send images
+        for image_url in image_urls:
+            await ctx.send(image_url)  # Indentation should align with the for-loop
 
     else:
+        # Proper indentation for the else block
         await ctx.send(f"Chemin guide for '{chemin_name}' not found.")
+
 
 @bot.event
 async def on_ready():

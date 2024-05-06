@@ -2,4 +2,4 @@ discord.py>=2.0.0,<3.0.0  # This ensures compatibility with recent discord.py re
 requests>=2.25.0  # Requests library for HTTP operations
 beautifulsoup4>=4.9.0  # BeautifulSoup for HTML parsing
 python-dotenv
-
+pytest

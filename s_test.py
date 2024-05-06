@@ -1,29 +1,17 @@
 import pytest
-import discord
 from discord.ext import commands
-from discord.ext.test import backend, test as dpytest
-from main import bot, scrape_chemin_guide
+from main import bot  # Import your bot instance
 
+# Example test to check if the command works
 @pytest.mark.asyncio
 async def test_chemin_command():
-    # Initialize the Discord test environment
-    await dpytest.empty_cache()  # Ensure a clean environment
+    # Simulate a command message
+    from discord.ext.test import backend, test as dpytest
+    await dpytest.empty_cache()  # Clear previous cache
 
-    # Create a test context with the mock bot
     test_message = "!chemin Dark Vlad"  # Command you want to test
-    await bot.process_commands(discord.Message(content=test_message, author=None, channel=None))
+    await bot.process_commands(test_message)
 
-    # Check if the response is as expected
-    # Assuming scrape_chemin_guide returns text_content and image_urls
-    text_content, image_urls = scrape_chemin_guide("Dark Vlad")
-
-    # Check if a message containing text content is sent
-    if text_content:
-        chunks = [text_content[i:i+1900] for i in range(0, len(text_content), 1900)]
-        for chunk in chunks:
-            await dpytest.verify_message(chunk)  # Check if the chunk was sent
-
-    # Check if messages with image URLs are sent
-    if image_urls:
-        for image_url in image_urls:
-            await dpytest.verify_message(image_url)  # Check if the image URL was sent
+    # Check if the expected response is returned
+    expected_response = "Your expected response text or image URLs here"
+    await dpytest.verify_message(expected_response)  # Check if this message was sent

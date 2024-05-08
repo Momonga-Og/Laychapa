@@ -1,2 +1,3 @@
 # Laychapa
-A bot scrapper for Papycha.fr . dofus touch Players can have Papycha.fr in their Discord 
+
+**Laychapa Bot**: Your Ultimate Dofus Touch Companion for Quest Guides, Pathfinding, and More! Simple Commands, Fast Results. Use the **!quest** and **!chemin** prefixes followed by the quest name.

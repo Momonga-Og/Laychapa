@@ -1,17 +1,20 @@
 import pytest
 from discord.ext import commands
-from main import bot  # Import your bot instance
+import discord.ext.test as dpytest
+from main import bot  # Ensure 'bot' is the Discord bot instance from your main code
 
-# Example test to check if the command works
 @pytest.mark.asyncio
 async def test_chemin_command():
-    # Simulate a command message
-    from discord.ext.test import backend, test as dpytest
-    await dpytest.empty_cache()  # Clear previous cache
+    # Initialize the test environment and clear any previous test state
+    dpytest.configure(bot)  # This sets up the bot with the test environment
+    await dpytest.empty_cache()  # Clears any cache from previous tests
 
-    test_message = "!chemin Dark Vlad"  # Command you want to test
-    await bot.process_commands(test_message)
+    # Simulate a user sending a command in a Discord text channel
+    test_message = "!chemin Dark Vlad"  # Command to test
+    await dpytest.message(test_message)  # Simulates sending the message to the bot
 
-    # Check if the expected response is returned
-    expected_response = "Your expected response text or image URLs here"
-    await dpytest.verify_message(expected_response)  # Check if this message was sent
+    # Define the expected response (customize this with your actual expected output)
+    expected_response = "Here's the info about Dark Vlad: <some text or link>"  # Modify to match your bot's response
+
+    # Verify if the bot's response matches the expected response
+    await dpytest.verify_message(expected_response)  # Check if the bot sent the expected message

@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
-# Define intents
+# Define intent
 intents = discord.Intents.default()
 
 # Load environment variables from the .env file

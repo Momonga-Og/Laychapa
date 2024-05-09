@@ -3,3 +3,4 @@ requests>=2.25.0  # Requests library for HTTP operations
 beautifulsoup4>=4.9.0  # BeautifulSoup for HTML parsing
 python-dotenv
 pytest
+discord.ext.test

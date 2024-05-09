@@ -4,7 +4,7 @@ from discord.ext import commands
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-
+  
 # Define intents
 intents = discord.Intents.default()
 

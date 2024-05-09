@@ -46,6 +46,7 @@ def scrape_chemin_guide(chemin_name):
     response = requests.get(website_url)
     soup = BeautifulSoup(response.content, 'html.parser')
     # Find the relevant content from the website
+    #1
     chemin_guide_content = soup.find('div', class_='entry-content')
     if chemin_guide_content:
         # Extract text content and image URLs

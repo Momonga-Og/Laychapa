@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import logging
 import re
 import unicodedata
+from googletrans import Translator  # Import Translator
 
 # Logging setup
 logging.basicConfig(level=logging.INFO)
@@ -69,11 +70,23 @@ def scrape_chemin_guide(chemin_name):
     else:
         return None, None
 
+# Translator instance
+translator = Translator()
+
+async def translate_content(content, language):
+    if language not in ["fr", "es", "ar"]:
+        return content  # Default to original if language not supported
+    translated = translator.translate(content, dest=language)
+    return translated.text
+
 @tree.command(name="quest", description="Retrieve the guide for a specific quest.")
-async def quest_command(interaction: discord.Interaction, quest_name: str):
+async def quest_command(interaction: discord.Interaction, quest_name: str, language: str = "en"):
     await interaction.response.defer()
     text_content, image_urls = scrape_quest_guide(quest_name)
     if text_content:
+        # Translate content if requested language is different from English
+        if language != "en":
+            text_content = await translate_content(text_content, language)
         chunks = [text_content[i:i+1900] for i in range(0, len(text_content), 1900)]
         for chunk in chunks:
             await interaction.followup.send(chunk)
@@ -83,10 +96,13 @@ async def quest_command(interaction: discord.Interaction, quest_name: str):
         await interaction.followup.send(f"Quest guide for '{quest_name}' not found.")
 
 @tree.command(name="path", description="Retrieve the guide for a specific path.")
-async def path_command(interaction: discord.Interaction, path_name: str):
+async def path_command(interaction: discord.Interaction, path_name: str, language: str = "en"):
     await interaction.response.defer()
     text_content, image_urls = scrape_chemin_guide(path_name)
     if text_content:
+        # Translate content if requested language is different from English
+        if language != "en":
+            text_content = await translate_content(text_content, language)
         chunks = [text_content[i:i + 1900] for i in range(0, len(text_content), 1900)]
         for chunk in chunks:
             await interaction.followup.send(chunk)

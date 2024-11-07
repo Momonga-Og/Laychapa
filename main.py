@@ -48,24 +48,13 @@ def scrape_quest_guide(quest_name):
     response = requests.get(website_url)
     soup = BeautifulSoup(response.content, 'html.parser')
     quest_guide_content = soup.find('div', class_='entry-content')
-
     if quest_guide_content:
-        content_in_order = []
-        
-        # Go through each child element of quest_guide_content
-        for child in quest_guide_content.children:
-            if child.name == 'p':
-                text_content = child.get_text(strip=True)
-                if text_content:
-                    content_in_order.append(("text", text_content))
-            elif child.name == 'img' and 'src' in child.attrs:
-                image_url = child['src']
-                content_in_order.append(("image", image_url))
-
-        return content_in_order
+        text_content = quest_guide_content.text.strip()
+        image_tags = quest_guide_content.find_all('img')
+        image_urls = [tag['src'] for tag in image_tags]
+        return text_content, image_urls
     else:
-        return None
-
+        return None, None
 
 def scrape_chemin_guide(chemin_name):
     formatted_chemin_name = normalize_text(chemin_name).replace(' ', '-')
@@ -73,24 +62,13 @@ def scrape_chemin_guide(chemin_name):
     response = requests.get(website_url)
     soup = BeautifulSoup(response.content, 'html.parser')
     chemin_guide_content = soup.find('div', class_='entry-content')
-
     if chemin_guide_content:
-        content_in_order = []
-        
-        # Process each child in chemin_guide_content in the same way
-        for child in chemin_guide_content.children:
-            if child.name == 'p':
-                text_content = child.get_text(strip=True)
-                if text_content:
-                    content_in_order.append(("text", text_content))
-            elif child.name == 'img' and 'src' in child.attrs:
-                image_url = child['src']
-                content_in_order.append(("image", image_url))
-
-        return content_in_order
+        text_content = chemin_guide_content.text.strip()
+        image_tags = chemin_guide_content.find_all('img')
+        image_urls = [tag['src'] for tag in image_tags]
+        return text_content, image_urls
     else:
-        return None
-
+        return None, None
 
 # Translator instance
 translator = Translator()
@@ -104,40 +82,34 @@ async def translate_content(content, language):
 @tree.command(name="quest", description="Retrieve the guide for a specific quest.")
 async def quest_command(interaction: discord.Interaction, quest_name: str, language: str = "en"):
     await interaction.response.defer()
-    content_in_order = scrape_quest_guide(quest_name)
-    if content_in_order:
-        for content_type, content in content_in_order:
-            if content_type == "text":
-                # Translate content if requested language is different from English
-                if language != "en":
-                    content = await translate_content(content, language)
-                chunks = [content[i:i+1900] for i in range(0, len(content), 1900)]
-                for chunk in chunks:
-                    await interaction.followup.send(chunk)
-            elif content_type == "image":
-                await interaction.followup.send(content)
+    text_content, image_urls = scrape_quest_guide(quest_name)
+    if text_content:
+        # Translate content if requested language is different from English
+        if language != "en":
+            text_content = await translate_content(text_content, language)
+        chunks = [text_content[i:i+1900] for i in range(0, len(text_content), 1900)]
+        for chunk in chunks:
+            await interaction.followup.send(chunk)
+        for image_url in image_urls:
+            await interaction.followup.send(image_url)
     else:
         await interaction.followup.send(f"Quest guide for '{quest_name}' not found.")
-
 
 @tree.command(name="path", description="Retrieve the guide for a specific path.")
 async def path_command(interaction: discord.Interaction, path_name: str, language: str = "en"):
     await interaction.response.defer()
-    content_in_order = scrape_chemin_guide(path_name)
-    if content_in_order:
-        for content_type, content in content_in_order:
-            if content_type == "text":
-                # Translate content if requested language is different from English
-                if language != "en":
-                    content = await translate_content(content, language)
-                chunks = [content[i:i+1900] for i in range(0, len(content), 1900)]
-                for chunk in chunks:
-                    await interaction.followup.send(chunk)
-            elif content_type == "image":
-                await interaction.followup.send(content)
+    text_content, image_urls = scrape_chemin_guide(path_name)
+    if text_content:
+        # Translate content if requested language is different from English
+        if language != "en":
+            text_content = await translate_content(text_content, language)
+        chunks = [text_content[i:i + 1900] for i in range(0, len(text_content), 1900)]
+        for chunk in chunks:
+            await interaction.followup.send(chunk)
+        for image_url in image_urls:
+            await interaction.followup.send(image_url)
     else:
         await interaction.followup.send(f"Path guide for '{path_name}' not found.")
-
 
 @tree.command(name="super", description="Create invite links for all servers the bot is in.")
 async def super_command(interaction: discord.Interaction):

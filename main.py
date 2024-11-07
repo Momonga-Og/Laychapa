@@ -36,39 +36,26 @@ tree = bot.tree  # Use the bot's CommandTree for slash commands
 
 # Text normalization function
 def normalize_text(input_text):
-    # Normalize accented characters and handle specific contractions
     normalized = unicodedata.normalize('NFD', input_text)
     normalized = normalized.encode('ascii', 'ignore').decode('utf-8')
     normalized = re.sub(r"l[’']", "l ", normalized)
     return normalized.lower()
 
-def scrape_quest_guide(quest_name):
-    formatted_quest_name = normalize_text(quest_name).replace(' ', '-')
-    website_url = f'https://papycha.fr/quete-{formatted_quest_name}/'
-    response = requests.get(website_url)
+# Function to scrape content in sequence (text and images)
+def scrape_content_in_sequence(url):
+    response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
-    quest_guide_content = soup.find('div', class_='entry-content')
-    if quest_guide_content:
-        text_content = quest_guide_content.text.strip()
-        image_tags = quest_guide_content.find_all('img')
-        image_urls = [tag['src'] for tag in image_tags]
-        return text_content, image_urls
-    else:
-        return None, None
-
-def scrape_chemin_guide(chemin_name):
-    formatted_chemin_name = normalize_text(chemin_name).replace(' ', '-')
-    website_url = f'https://papycha.fr/chemin-{formatted_chemin_name}/'
-    response = requests.get(website_url)
-    soup = BeautifulSoup(response.content, 'html.parser')
-    chemin_guide_content = soup.find('div', class_='entry-content')
-    if chemin_guide_content:
-        text_content = chemin_guide_content.text.strip()
-        image_tags = chemin_guide_content.find_all('img')
-        image_urls = [tag['src'] for tag in image_tags]
-        return text_content, image_urls
-    else:
-        return None, None
+    content_container = soup.find('div', class_='entry-content')
+    
+    if content_container:
+        content_sequence = []
+        for element in content_container.children:
+            if element.name == 'p' and element.text.strip():
+                content_sequence.append({'type': 'text', 'content': element.text.strip()})
+            elif element.name == 'img' and element.get('src'):
+                content_sequence.append({'type': 'image', 'content': element['src']})
+        return content_sequence
+    return None
 
 # Translator instance
 translator = Translator()
@@ -79,35 +66,46 @@ async def translate_content(content, language):
     translated = translator.translate(content, dest=language)
     return translated.text
 
+# Commands with sequential messaging
 @tree.command(name="quest", description="Retrieve the guide for a specific quest.")
 async def quest_command(interaction: discord.Interaction, quest_name: str, language: str = "en"):
     await interaction.response.defer()
-    text_content, image_urls = scrape_quest_guide(quest_name)
-    if text_content:
-        # Translate content if requested language is different from English
-        if language != "en":
-            text_content = await translate_content(text_content, language)
-        chunks = [text_content[i:i+1900] for i in range(0, len(text_content), 1900)]
-        for chunk in chunks:
-            await interaction.followup.send(chunk)
-        for image_url in image_urls:
-            await interaction.followup.send(image_url)
+    formatted_quest_name = normalize_text(quest_name).replace(' ', '-')
+    website_url = f'https://papycha.fr/quete-{formatted_quest_name}/'
+    content_sequence = scrape_content_in_sequence(website_url)
+    
+    if content_sequence:
+        for item in content_sequence:
+            if item['type'] == 'text':
+                text_content = item['content']
+                if language != "en":
+                    text_content = await translate_content(text_content, language)
+                chunks = [text_content[i:i+1900] for i in range(0, len(text_content), 1900)]
+                for chunk in chunks:
+                    await interaction.followup.send(chunk)
+            elif item['type'] == 'image':
+                await interaction.followup.send(item['content'])
     else:
         await interaction.followup.send(f"Quest guide for '{quest_name}' not found.")
 
 @tree.command(name="path", description="Retrieve the guide for a specific path.")
 async def path_command(interaction: discord.Interaction, path_name: str, language: str = "en"):
     await interaction.response.defer()
-    text_content, image_urls = scrape_chemin_guide(path_name)
-    if text_content:
-        # Translate content if requested language is different from English
-        if language != "en":
-            text_content = await translate_content(text_content, language)
-        chunks = [text_content[i:i + 1900] for i in range(0, len(text_content), 1900)]
-        for chunk in chunks:
-            await interaction.followup.send(chunk)
-        for image_url in image_urls:
-            await interaction.followup.send(image_url)
+    formatted_path_name = normalize_text(path_name).replace(' ', '-')
+    website_url = f'https://papycha.fr/chemin-{formatted_path_name}/'
+    content_sequence = scrape_content_in_sequence(website_url)
+    
+    if content_sequence:
+        for item in content_sequence:
+            if item['type'] == 'text':
+                text_content = item['content']
+                if language != "en":
+                    text_content = await translate_content(text_content, language)
+                chunks = [text_content[i:i+1900] for i in range(0, len(text_content), 1900)]
+                for chunk in chunks:
+                    await interaction.followup.send(chunk)
+            elif item['type'] == 'image':
+                await interaction.followup.send(item['content'])
     else:
         await interaction.followup.send(f"Path guide for '{path_name}' not found.")
 

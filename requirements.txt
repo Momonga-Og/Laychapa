@@ -1,5 +1,6 @@
-discord.py>=2.0.0,<3.0.0  # This ensures compatibility with recent discord.py releases
-requests>=2.25.0  # Requests library for HTTP operations
-beautifulsoup4>=4.9.0  # BeautifulSoup for HTML parsing
+discord.py>=2.0.0,<3.0.0  
+requests>=2.25.0  
+beautifulsoup4>=4.9.0  
 python-dotenv
 pytest
+googletrans==4.0.0-rc1

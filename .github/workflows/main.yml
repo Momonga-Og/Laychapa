@@ -1,4 +1,4 @@
-name: Deploy Discord Bot
+name: Deploy Laychapa Bot
 
 on:
   push:
@@ -7,6 +7,8 @@ on:
   pull_request:
     branches:
       - main
+  schedule:
+    - cron: '0 */5 * * *'  # Triggers deployment every 5 hours
 
 jobs:
   test:

@@ -84,7 +84,10 @@ async def quest_command(interaction: discord.Interaction, quest_name: str, langu
                 for chunk in chunks:
                     await interaction.followup.send(chunk)
             elif item['type'] == 'image':
-                await interaction.followup.send(item['content'])
+                image_url = item['content']
+                embed = discord.Embed()
+                embed.set_image(url=image_url)  # Embed the image
+                await interaction.followup.send(embed=embed)
     else:
         await interaction.followup.send(f"Quest guide for '{quest_name}' not found.")
 
@@ -105,7 +108,10 @@ async def path_command(interaction: discord.Interaction, path_name: str, languag
                 for chunk in chunks:
                     await interaction.followup.send(chunk)
             elif item['type'] == 'image':
-                await interaction.followup.send(item['content'])
+                image_url = item['content']
+                embed = discord.Embed()
+                embed.set_image(url=image_url)  # Embed the image
+                await interaction.followup.send(embed=embed)
     else:
         await interaction.followup.send(f"Path guide for '{path_name}' not found.")
 

